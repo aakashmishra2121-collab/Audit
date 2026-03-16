@@ -33,7 +33,7 @@ def extract_text_from_pdf(file):
     except:
         pass
 
-    # If no text detected → apply OCR
+    # If PDF has no selectable text → use OCR
     if text.strip() == "":
         images = convert_from_bytes(file.read())
         for img in images:
@@ -77,23 +77,29 @@ def extract_fields(text):
     # APPROVER EXTRACTION (FIXED)
     # -----------------------------
 
+    approver = ""
+
     approver_match = re.search(
-        r'Approved\s+([A-Za-z\s]+?)\s+Comments',
+        r'Approved\s*\n\s*([A-Za-z\s]+)',
         text
     )
 
-    approver = approver_match.group(1).strip() if approver_match else ""
+    if approver_match:
+        approver = approver_match.group(1).strip()
 
     # -----------------------------
-    # CREATED DATE
+    # CREATED DATE EXTRACTION
     # -----------------------------
+
+    created = ""
 
     created_match = re.search(
-        r'Created\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
+        r'Created\s*\n\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
         text
     )
 
-    created = created_match.group(1) if created_match else ""
+    if created_match:
+        created = created_match.group(1)
 
     data = {
         "RITM Number": ritm_number,

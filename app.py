@@ -90,17 +90,13 @@ def extract_fields(text):
     # -----------------------------
 
     created = ""
+    created_match = re.search(
+        r'Created[\s\n]*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
+        text
+    )
 
-    created_patterns = [
-        r'Created\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
-        r'Created\s*\n\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})'
-    ]
-
-    for p in created_patterns:
-        match = re.search(p, text)
-        if match:
-            created = match.group(1)
-            break
+    if created_match:
+        created = created_match.group(1)
 
     data = {
         "RITM Number": ritm_number,

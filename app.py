@@ -52,10 +52,6 @@ def extract_fields(text):
         match = re.search(pattern, text, re.IGNORECASE)
         return match.group(1).strip() if match else ""
 
-    # -----------------------------
-    # BASIC FIELDS
-    # -----------------------------
-
     ritm = re.search(r'RITM\d+', text)
     ritm_number = ritm.group(0) if ritm else ""
 
@@ -67,36 +63,29 @@ def extract_fields(text):
         r'What action do you require on the account\?\s*(.+)'
     )
 
-    # -----------------------------
-    # APPROVER EXTRACTION
-    # -----------------------------
-
+    # Approver
     approver = ""
-
-    patterns = [
+    approver_patterns = [
         r'Approved\s+([A-Za-z\s]+)',
         r'Approver\s*\n\s*([A-Za-z\s]+)',
         r'Approved\s*\n\s*([A-Za-z\s]+)'
     ]
 
-    for p in patterns:
+    for p in approver_patterns:
         match = re.search(p, text)
         if match:
             approver = match.group(1).strip()
             break
 
-    # -----------------------------
-    # CREATED DATE EXTRACTION
-    # -----------------------------
-
+    # Created timestamp (robust)
     created = ""
-    created_match = re.search(
-        r'Created[\s\n]*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
+    dates = re.findall(
+        r'\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2}',
         text
     )
 
-    if created_match:
-        created = created_match.group(1)
+    if dates:
+        created = dates[-1]
 
     data = {
         "RITM Number": ritm_number,
@@ -110,7 +99,6 @@ def extract_fields(text):
     }
 
     return data
-
 # -----------------------------
 # PROCESS FILES
 # -----------------------------

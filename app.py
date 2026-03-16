@@ -52,40 +52,38 @@ def extract_fields(text):
         match = re.search(pattern, text, re.IGNORECASE)
         return match.group(1).strip() if match else ""
 
-    # RITM Number
+    # -----------------------------
+    # BASIC FIELDS
+    # -----------------------------
+
     ritm = re.search(r'RITM\d+', text)
     ritm_number = ritm.group(0) if ritm else ""
 
-    # Requested For
     requested_for = search(r'Requested\s*for\s*(.+)')
-
-    # Opened
-    opened = search(r'Opened\s*(\d{2}/\d{2}/\d{4}\s*\d{2}:\d{2}:\d{2})')
-
-    # Opened By
+    opened = search(r'Opened\s*(\d{2}/\d{2}/\d{4}.*)')
     opened_by = search(r'Opened\s*by\s*(.+)')
-
-    # State
     state = search(r'State\s*(Closed Complete|Closed|Open|Completed)')
-
-    # Action Required
     action_required = search(
         r'What action do you require on the account\?\s*(.+)'
     )
 
     # -----------------------------
-    # APPROVER EXTRACTION (FIXED)
+    # APPROVER EXTRACTION
     # -----------------------------
 
     approver = ""
 
-    approver_match = re.search(
-        r'Approved\s*\n\s*([A-Za-z\s]+)',
-        text
-    )
+    patterns = [
+        r'Approved\s+([A-Za-z\s]+)',
+        r'Approver\s*\n\s*([A-Za-z\s]+)',
+        r'Approved\s*\n\s*([A-Za-z\s]+)'
+    ]
 
-    if approver_match:
-        approver = approver_match.group(1).strip()
+    for p in patterns:
+        match = re.search(p, text)
+        if match:
+            approver = match.group(1).strip()
+            break
 
     # -----------------------------
     # CREATED DATE EXTRACTION
@@ -93,13 +91,16 @@ def extract_fields(text):
 
     created = ""
 
-    created_match = re.search(
-        r'Created\s*\n\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
-        text
-    )
+    created_patterns = [
+        r'Created\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})',
+        r'Created\s*\n\s*(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})'
+    ]
 
-    if created_match:
-        created = created_match.group(1)
+    for p in created_patterns:
+        match = re.search(p, text)
+        if match:
+            created = match.group(1)
+            break
 
     data = {
         "RITM Number": ritm_number,
@@ -113,7 +114,6 @@ def extract_fields(text):
     }
 
     return data
-
 
 # -----------------------------
 # PROCESS FILES
